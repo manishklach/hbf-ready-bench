@@ -22,12 +22,18 @@ You can run sweeps over prompt length (p) and generation length (n) to build a p
 ---
 
 ## 0) Repo layout (what’s in here)
-
 Typical files:
 - `harness/run_llama_bench.py` — run one benchmark and write JSON
 - `harness/sweep_llama_bench.py` — run a grid sweep (p×n) and write CSV + JSONs
 - `harness/system_info.py` — capture system/WSL context into `results/system_info.json`
-- `docs/methodology.md` — protocol + notes (optional)
+
+V2 (HBF emulation additions):
+- `emulation/tier_copy.py` — **you added this**; throttled “tier” copy with BW cap + per-chunk latency
+- `harness/sweep_hbf_weight_tier.py` — stage model via `tier_copy.py` at different constraints, then run `llama-bench`
+- `emulation/kv_spill_sim.py` — compute decode ceiling vs tier BW/lat for assumed KV spill volume
+- `docs/hbf_emulation_v2.md` — interpretation and examples
+
+> Note: V2 emulates HBF-like tier constraints without real HBF hardware. It produces requirement curves.
 
 ---
 
@@ -262,6 +268,63 @@ This repo provides:
 **V2 goal:** add explicit “tier constraint” emulation and plot/report deltas
 
 ---
+
+---
+
+# V2: HBF-like tier emulation (weight-tier + KV spill)
+
+HBF is positioned as a memory tier between HBM and SSD. To make this concrete without HBF hardware, V2 adds tools that emulate a constrained tier and generate *workload-driven requirement curves*.
+
+## V2-A) Weight-tier emulation (staged model through constrained tier)
+
+This models a “weights live in a tier” workflow:
+1) Stage (copy) the model through a **bandwidth/latency constrained** path (`emulation/tier_copy.py`)
+2) Run `llama-bench` on the staged model
+3) Record:
+   - staging time / effective MB/s
+   - `pp` (prefill) and `tg` (decode) tokens/sec
+
+### 1) Create a staged directory
+```bash
+mkdir -p ~/models_staged
+```
+
+### 2) Run a sweep over tier constraints
+```bash
+./harness/sweep_hbf_weight_tier.py \
+  --model ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
+  --staged_dir ~/models_staged \
+  --mbps_list 250,500,1000,2000,4000 \
+  --lat_ms_list 0,0.05,0.2 \
+  -t 8 -p 256 -n 256 \
+  --mode hbf-emu \
+  --out_dir results/hbf_weight_tier \
+  --csv_out results/hbf_weight_tier.csv
+```
+
+Outputs:
+- `results/hbf_weight_tier.csv` (summary)
+- `results/hbf_weight_tier/*.json` (per-point artifacts)
+- staged models under `~/models_staged/`
+
+**Interpretation:** if staging dominates end-to-end latency, the tier BW/lat targets need to be higher, or the system must prefetch/hide staging.
+
+## V2-B) KV spill decode ceiling simulator
+
+Decode throughput is often the first to collapse when a tier has poor latency/jitter. This simulator turns “KV spill to tier” into a quantitative ceiling:
+
+```bash
+python3 emulation/kv_spill_sim.py \
+  --kv_kb_per_token 256 \
+  --tier_mbps_list 500,1000,2000,4000,8000 \
+  --op_lat_ms 0.05 \
+  --ops_per_token 2
+```
+
+This prints `tier_mbps,tg_tps_max`, a conservative “decode cap” imposed by BW+latency assumptions.
+
+See `docs/hbf_emulation_v2.md` for more details.
+
 
 ## 10) Troubleshooting
 

@@ -1,0 +1,16 @@
+timestamp_unix,mode,tag,model,threads,p,n,repeat,tier_mbps,tier_lat_ms,tier_chunk_mb,stage_seconds,stage_effective_mbps,pp_tps,tg_tps,json_path
+1772126463,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,250.0,0.0,4.0,9.819,214.38,22.20 ± 2.77,4.80 ± 2.49,results/hbf_weight_tier/weight_tier_mbps250_lat0_p256_n256_r1.json
+1772126718,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,250.0,0.05,4.0,22.494,93.58,31.26 ± 3.95,7.86 ± 2.14,results/hbf_weight_tier/weight_tier_mbps250_lat0.05_p256_n256_r1.json
+1772126960,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,250.0,0.2,4.0,10.584,198.88,32.16 ± 5.50,7.76 ± 1.32,results/hbf_weight_tier/weight_tier_mbps250_lat0.2_p256_n256_r1.json
+1772127163,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,500.0,0.0,4.0,8.773,239.93,39.55 ± 5.21,9.07 ± 1.41,results/hbf_weight_tier/weight_tier_mbps500_lat0_p256_n256_r1.json
+1772127381,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,500.0,0.05,4.0,5.941,354.32,33.13 ± 6.24,8.34 ± 1.52,results/hbf_weight_tier/weight_tier_mbps500_lat0.05_p256_n256_r1.json
+1772127573,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,500.0,0.2,4.0,4.958,424.54,41.18 ± 5.40,9.06 ± 0.76,results/hbf_weight_tier/weight_tier_mbps500_lat0.2_p256_n256_r1.json
+1772127749,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,1000.0,0.0,4.0,4.006,525.43,34.37 ± 2.48,10.61 ± 1.49,results/hbf_weight_tier/weight_tier_mbps1000_lat0_p256_n256_r1.json
+1772127945,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,1000.0,0.05,4.0,4.488,469.01,36.83 ± 3.68,8.93 ± 1.30,results/hbf_weight_tier/weight_tier_mbps1000_lat0.05_p256_n256_r1.json
+1772128166,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,1000.0,0.2,4.0,4.951,425.17,25.63 ± 1.83,8.76 ± 1.31,results/hbf_weight_tier/weight_tier_mbps1000_lat0.2_p256_n256_r1.json
+1772128374,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,2000.0,0.0,4.0,4.076,516.44,28.71 ± 3.40,8.93 ± 0.57,results/hbf_weight_tier/weight_tier_mbps2000_lat0_p256_n256_r1.json
+1772128578,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,2000.0,0.05,4.0,4.986,422.15,27.70 ± 2.56,9.34 ± 0.39,results/hbf_weight_tier/weight_tier_mbps2000_lat0.05_p256_n256_r1.json
+1772128774,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,2000.0,0.2,4.0,4.172,504.52,27.92 ± 2.62,9.68 ± 0.32,results/hbf_weight_tier/weight_tier_mbps2000_lat0.2_p256_n256_r1.json
+1772128985,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,4000.0,0.0,4.0,3.979,528.97,28.67 ± 3.77,8.76 ± 0.31,results/hbf_weight_tier/weight_tier_mbps4000_lat0_p256_n256_r1.json
+1772129201,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,4000.0,0.05,4.0,4.164,505.46,27.21 ± 2.02,8.54 ± 0.34,results/hbf_weight_tier/weight_tier_mbps4000_lat0.05_p256_n256_r1.json
+1772129451,hbf-emu,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,4000.0,0.2,4.0,4.293,490.3,26.16 ± 2.19,7.80 ± 2.22,results/hbf_weight_tier/weight_tier_mbps4000_lat0.2_p256_n256_r1.json

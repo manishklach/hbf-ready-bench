@@ -1,0 +1,77 @@
+{
+  "schema": "hbf-ready-bench.hbf-weight-tier.v1",
+  "timestamp_unix": 1772135648,
+  "mode": "hbf-emu",
+  "tag": "",
+  "model": "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+  "staged_model": "/home/manishkl/models_staged/qwen2.5-3b-instruct-q4_k_m.gguf.staged_mbps1000_lat5_chunk4.gguf",
+  "threads": 8,
+  "prompt_tokens": 256,
+  "gen_tokens": 256,
+  "tier": {
+    "mbps": 1000.0,
+    "lat_ms": 5.0,
+    "chunk_mb": 4.0
+  },
+  "stage": {
+    "cmd": [
+      "python3",
+      "/home/manishkl/work/hbf-ready-bench/emulation/tier_copy.py",
+      "--src",
+      "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "--dst",
+      "/home/manishkl/models_staged/qwen2.5-3b-instruct-q4_k_m.gguf.staged_mbps1000_lat5_chunk4.gguf",
+      "--mbps",
+      "1000.0",
+      "--chunk_mb",
+      "4.0",
+      "--lat_ms",
+      "5.0"
+    ],
+    "wall_seconds": 14.49329686164856,
+    "parsed": {
+      "copied_bytes": 2104932768,
+      "duration_s": 14.449,
+      "size_GB": 2.105,
+      "effective_MBps": 145.68
+    },
+    "stdout": "copied_bytes=2104932768\nduration_s=14.449\nsize_GB=2.105\neffective_MBps=145.68\n"
+  },
+  "bench": {
+    "cmd": [
+      "/home/manishkl/work/llama.cpp/build/bin/llama-bench",
+      "-m",
+      "/home/manishkl/models_staged/qwen2.5-3b-instruct-q4_k_m.gguf.staged_mbps1000_lat5_chunk4.gguf",
+      "-t",
+      "8",
+      "-p",
+      "256",
+      "-n",
+      "256"
+    ],
+    "wall_seconds": 264.35016679763794,
+    "rows": [
+      {
+        "model": "qwen2 3B Q4_K - Medium",
+        "size": "1.95 GiB",
+        "params": "3.40 B",
+        "backend": "CPU",
+        "threads": "8",
+        "test": "pp256",
+        "tps": "23.98 \u00b1 4.19"
+      },
+      {
+        "model": "qwen2 3B Q4_K - Medium",
+        "size": "1.95 GiB",
+        "params": "3.40 B",
+        "backend": "CPU",
+        "threads": "8",
+        "test": "tg256",
+        "tps": "6.75 \u00b1 0.93"
+      }
+    ],
+    "pp_tps": "23.98 \u00b1 4.19",
+    "tg_tps": "6.75 \u00b1 0.93"
+  },
+  "output_tail": "copied_bytes=2104932768\nduration_s=14.449\nsize_GB=2.105\neffective_MBps=145.68\n\n| model                          |       size |     params | backend    | threads |            test |                  t/s |\n| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |\n| qwen2 3B Q4_K - Medium         |   1.95 GiB |     3.40 B | CPU        |       8 |           pp256 |         23.98 \u00b1 4.19 |\n| qwen2 3B Q4_K - Medium         |   1.95 GiB |     3.40 B | CPU        |       8 |           tg256 |          6.75 \u00b1 0.93 |\n\nbuild: bd7230059 (8158)"
+}
