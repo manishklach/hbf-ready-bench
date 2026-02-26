@@ -1,0 +1,45 @@
+{
+  "schema": "hbf-ready-bench.llama-bench.v1",
+  "timestamp_unix": 1772110665,
+  "mode": "cold",
+  "tag": "",
+  "cmd": [
+    "/home/manishkl/work/llama.cpp/build/bin/llama-bench",
+    "-m",
+    "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+    "-t",
+    "8",
+    "-p",
+    "64",
+    "-n",
+    "256"
+  ],
+  "wall_time_ms": 329425.79197883606,
+  "model_path": "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+  "threads": 8,
+  "prompt_tokens": 64,
+  "gen_tokens": 256,
+  "pp_tps": "25.75 \u00b1 3.39",
+  "tg_tps": "4.70 \u00b1 1.90",
+  "rows": [
+    {
+      "model": "qwen2 3B Q4_K - Medium",
+      "size": "1.95 GiB",
+      "params": "3.40 B",
+      "backend": "CPU",
+      "threads": "8",
+      "test": "pp64",
+      "tps": "25.75 \u00b1 3.39"
+    },
+    {
+      "model": "qwen2 3B Q4_K - Medium",
+      "size": "1.95 GiB",
+      "params": "3.40 B",
+      "backend": "CPU",
+      "threads": "8",
+      "test": "tg256",
+      "tps": "4.70 \u00b1 1.90"
+    }
+  ],
+  "output_tail": "| model                          |       size |     params | backend    | threads |            test |                  t/s |\n| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |\n| qwen2 3B Q4_K - Medium         |   1.95 GiB |     3.40 B | CPU        |       8 |            pp64 |         25.75 \u00b1 3.39 |\n| qwen2 3B Q4_K - Medium         |   1.95 GiB |     3.40 B | CPU        |       8 |           tg256 |          4.70 \u00b1 1.90 |\n\nbuild: bd7230059 (8158)"
+}

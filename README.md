@@ -1,0 +1,301 @@
+# hbf-ready-bench
+
+Reproducible LLM inference benchmarks (prefill vs decode throughput) to inform requirements for an intermediate memory tier (**HBF-class**) between **HBM** and **SSD**.
+
+This repo uses **llama.cpp’s `llama-bench`** because it prints stable, machine-parseable throughput:
+- **ppXXX** = *prefill / prompt processing* tokens/sec
+- **tgXXX** = *decode / token generation* tokens/sec
+
+You can run sweeps over prompt length (p) and generation length (n) to build a performance surface and later re-run under “tier constraints” (bandwidth/latency/QoS emulation).
+
+---
+
+## Tested environment
+
+- Windows 11 + **WSL2 Ubuntu**
+- `llama.cpp` built from source
+- Model: **Qwen2.5-3B-Instruct GGUF (Q4_K_M)** (good for 16GB RAM)
+- Benchmark: `llama-bench` with `pp` and `tg` throughput
+
+> Tip: Keep model files in the Linux filesystem (`~/models/`), not under `/mnt/c/...`, for consistent performance.
+
+---
+
+## 0) Repo layout (what’s in here)
+
+Typical files:
+- `harness/run_llama_bench.py` — run one benchmark and write JSON
+- `harness/sweep_llama_bench.py` — run a grid sweep (p×n) and write CSV + JSONs
+- `harness/system_info.py` — capture system/WSL context into `results/system_info.json`
+- `docs/methodology.md` — protocol + notes (optional)
+
+---
+
+## 1) Install WSL2 Ubuntu (Windows)
+
+In **PowerShell (Admin)**:
+
+```powershell
+wsl --install -d Ubuntu-24.04
+```
+
+Reboot if prompted.
+
+Launch Ubuntu:
+
+```powershell
+wsl -d Ubuntu-24.04
+```
+
+---
+
+## 2) Install dependencies (inside Ubuntu / WSL)
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git build-essential cmake python3 python3-venv python3-pip wget unzip
+mkdir -p ~/work ~/models
+```
+
+---
+
+## 3) Build llama.cpp (inside Ubuntu / WSL)
+
+```bash
+cd ~/work
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+cmake -B build
+cmake --build build -j 2
+```
+
+Verify:
+
+```bash
+ls -la build/bin | grep llama-bench
+```
+
+### If the build gets killed (“Terminated”)
+Rebuild with fewer parallel jobs:
+
+```bash
+cmake --build build -j 1
+```
+
+---
+
+## 4) Download Qwen GGUF model (recommended baseline)
+
+For a 16GB machine, start with:
+
+**Qwen2.5-3B-Instruct GGUF → Q4_K_M**
+
+Download into Linux FS:
+
+```bash
+cd ~/models
+wget -O qwen2.5-3b-instruct-q4_k_m.gguf \
+  "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf"
+```
+
+Confirm size:
+
+```bash
+ls -lh ~/models/qwen2.5-3b-instruct-q4_k_m.gguf
+```
+
+### Alternate: download on Windows and copy into WSL
+If it’s in Windows Downloads:
+
+```bash
+cp /mnt/c/Users/<WIN_USERNAME>/Downloads/qwen2.5-3b-instruct-q4_k_m.gguf ~/models/
+```
+
+To print your Windows username from WSL:
+
+```bash
+cmd.exe /c echo %USERNAME%
+```
+
+---
+
+## 5) Set up this repo’s Python environment
+
+From this repo root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+chmod +x harness/*.py
+```
+
+(Optional) capture machine context:
+
+```bash
+./harness/system_info.py
+cat results/system_info.json | head
+```
+
+---
+
+## 6) Run a single benchmark (pp/tg throughput)
+
+### A) Run `llama-bench` directly
+
+```bash
+~/work/llama.cpp/build/bin/llama-bench \
+  -m ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
+  -t 8 \
+  -p 256 \
+  -n 256
+```
+
+You will see two rows at the end:
+- `pp256` (prefill t/s)
+- `tg256` (decode t/s)
+
+### B) Run via the repo harness (writes JSON)
+
+```bash
+./harness/run_llama_bench.py \
+  --model ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
+  -t 8 -p 256 -n 256 \
+  --mode warm \
+  --out results/bench_p256_n256.json
+```
+
+Inspect:
+
+```bash
+python3 - <<'PY'
+import json
+d=json.load(open("results/bench_p256_n256.json"))
+print("pp_tps:", d.get("pp_tps"))
+print("tg_tps:", d.get("tg_tps"))
+print("rows:", [(r.get("test"), r.get("tps")) for r in d.get("rows", [])])
+PY
+```
+
+---
+
+## 7) Run a BOTH sweep (prompt × generation grid)
+
+Example grid: p ∈ {64,128,256} and n ∈ {64,128,256}
+
+```bash
+./harness/sweep_llama_bench.py \
+  --model ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
+  -t 8 \
+  --mode warm \
+  --p_list 64,128,256 \
+  --n_list 64,128,256 \
+  --repeats 1 \
+  --out_dir results/sweep \
+  --csv_out results/bench_sweep.csv
+```
+
+Inspect:
+
+```bash
+head -n 5 results/bench_sweep.csv
+tail -n 5 results/bench_sweep.csv
+ls results/sweep | head
+```
+
+Outputs:
+- `results/bench_sweep.csv` (summary)
+- `results/sweep/*.json` (one JSON per grid point)
+
+---
+
+## 8) Warm vs Cold sweeps (WSL “cold-ish” protocol)
+
+Why: cold runs approximate “first-touch / not-cached” behavior and are useful for tier-sensitivity.
+
+### Cold protocol
+1) From PowerShell (Windows):
+
+```powershell
+wsl --shutdown
+```
+
+2) Relaunch Ubuntu:
+
+```powershell
+wsl -d Ubuntu-24.04
+```
+
+3) Run the same sweep labeled cold:
+
+```bash
+cd ~/work/hbf-ready-bench
+source .venv/bin/activate
+
+./harness/sweep_llama_bench.py \
+  --model ~/models/qwen2.5-3b-instruct-q4_k_m.gguf \
+  -t 8 \
+  --mode cold \
+  --p_list 64,128,256 \
+  --n_list 64,128,256 \
+  --repeats 3 \
+  --out_dir results/sweep_cold \
+  --csv_out results/bench_sweep_cold.csv
+```
+
+Now you can compare warm vs cold surfaces and quantify % drops in `pp` vs `tg`.
+
+---
+
+## 9) How this relates to HBF (why this repo is useful)
+
+HBF is positioned as a memory tier between HBM and SSD. Standards discussions need **workload-driven targets**:
+- How much throughput (and stability/QoS) is required so **decode (tg)** doesn’t collapse?
+- How much bandwidth is needed so **prefill (pp)** stays within X% of baseline?
+
+This repo provides:
+- A reproducible baseline surface (`pp` and `tg` over p/n)
+- A harness that can be re-run under “tier constraints” (bandwidth/latency/QoS emulation) to produce degradation curves
+- CSV/JSON artifacts that can be used in OCP-style discussions or future compliance tests
+
+**V1 goal:** baseline + sweep + warm/cold surfaces  
+**V2 goal:** add explicit “tier constraint” emulation and plot/report deltas
+
+---
+
+## 10) Troubleshooting
+
+### `llama-bench` exists but takes time
+Large p/n tests on CPU can take a while. Start with `-p 64 -n 64` as a smoke test.
+
+### Build gets killed (“Terminated”)
+- Use fewer parallel jobs: `cmake --build build -j 1`
+- Ensure WSL has enough memory/swap.
+
+### WSL reports less memory than the machine has
+WSL may auto-limit memory. Increase via:
+`C:\Users\<YOU>\.wslconfig`
+
+```ini
+[wsl2]
+memory=12GB
+swap=8GB
+processors=8
+```
+
+Then:
+
+```powershell
+wsl --shutdown
+```
+
+Relaunch and confirm:
+
+```bash
+free -h
+```
+
+---
+
+## License
+If you plan to share widely, pick a license (MIT/Apache-2.0) and add `LICENSE`.

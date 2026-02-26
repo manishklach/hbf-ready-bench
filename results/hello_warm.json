@@ -1,0 +1,35 @@
+{
+  "schema": "hbf-ready-bench.v1",
+  "runs": [
+    {
+      "timestamp_unix": 1772105675,
+      "mode": "warm",
+      "tag": "",
+      "cmd": "/home/manishkl/work/llama.cpp/build/bin/llama-cli -m /home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf -p Hello -n 64 -t 8 --seed 1234 --temp 0.7 --top-p 0.9",
+      "return_code": 0,
+      "wall_time_ms": 23070.4505443573,
+      "model_path": "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "llama_cli_path": "/home/manishkl/work/llama.cpp/build/bin/llama-cli",
+      "prompt": "Hello",
+      "metrics": {
+        "ttft_est_ms": null
+      },
+      "output_tail": "llama_memory_breakdown_print: | memory breakdown [MiB] | total   free    self   model   context   compute    unaccounted |\nllama_memory_breakdown_print: |   - Host               |                 3458 =  2001 +    1152 +     304                |\nllama_memory_breakdown_print: |   - CPU_REPACK         |                 1265 =  1265 +       0 +       0                |"
+    },
+    {
+      "timestamp_unix": 1772105696,
+      "mode": "warm",
+      "tag": "",
+      "cmd": "/home/manishkl/work/llama.cpp/build/bin/llama-cli -m /home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf -p Hello -n 64 -t 8 --seed 1234 --temp 0.7 --top-p 0.9",
+      "return_code": 0,
+      "wall_time_ms": 20814.464569091797,
+      "model_path": "/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "llama_cli_path": "/home/manishkl/work/llama.cpp/build/bin/llama-cli",
+      "prompt": "Hello",
+      "metrics": {
+        "ttft_est_ms": null
+      },
+      "output_tail": "llama_memory_breakdown_print: | memory breakdown [MiB] | total   free    self   model   context   compute    unaccounted |\nllama_memory_breakdown_print: |   - Host               |                 3458 =  2001 +    1152 +     304                |\nllama_memory_breakdown_print: |   - CPU_REPACK         |                 1265 =  1265 +       0 +       0                |"
+    }
+  ]
+}

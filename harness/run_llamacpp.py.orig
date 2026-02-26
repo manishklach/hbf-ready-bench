@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+import argparse
+import json
+import re
+import shlex
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+TIMING_PATTERNS = {
+    # prompt eval time =  1234.56 ms / 512 tokens (  2.41 ms per token, 414.51 tokens per second)
+    "prompt": re.compile(
+        r"prompt eval time\s*=\s*([0-9.]+)\s*ms\s*/\s*([0-9]+)\s*tokens.*?\(\s*([0-9.]+)\s*ms per token,\s*([0-9.]+)\s*tokens per second\)",
+        re.IGNORECASE,
+    ),
+    # eval time =  2345.67 ms / 256 tokens (  9.16 ms per token, 109.17 tokens per second)
+    "eval": re.compile(
+        r"eval time\s*=\s*([0-9.]+)\s*ms\s*/\s*([0-9]+)\s*tokens.*?\(\s*([0-9.]+)\s*ms per token,\s*([0-9.]+)\s*tokens per second\)",
+        re.IGNORECASE,
+    ),
+    "total": re.compile(r"total time\s*=\s*([0-9.]+)\s*ms", re.IGNORECASE),
+}
+
+def run_cmd(cmd: list[str], cwd: Optional[str] = None) -> Tuple[int, str]:
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        universal_newlines=True,
+    )
+    out_lines = []
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        out_lines.append(line)
+        sys.stdout.write(line)
+        sys.stdout.flush()
+    rc = proc.wait()
+    return rc, "".join(out_lines)
+
+def parse_timings(output: str) -> Dict[str, Any]:
+    parsed: Dict[str, Any] = {}
+    m = TIMING_PATTERNS["prompt"].search(output)
+    if m:
+        parsed["prompt_eval_ms"] = float(m.group(1))
+        parsed["prompt_tokens"] = int(m.group(2))
+        parsed["prompt_ms_per_token"] = float(m.group(3))
+        parsed["prompt_tok_per_s"] = float(m.group(4))
+
+    m = TIMING_PATTERNS["eval"].search(output)
+    if m:
+        parsed["gen_eval_ms"] = float(m.group(1))
+        parsed["gen_tokens"] = int(m.group(2))
+        parsed["gen_ms_per_token"] = float(m.group(3))
+        parsed["gen_tok_per_s"] = float(m.group(4))
+
+    m = TIMING_PATTERNS["total"].search(output)
+    if m:
+        parsed["total_time_ms"] = float(m.group(1))
+
+    return parsed
+
+def estimate_ttft_ms(timings: Dict[str, Any]) -> Optional[float]:
+    """
+    llama.cpp doesn't always print true TTFT. Provide a consistent estimate:
+      TTFT_est ≈ prompt_eval_ms + gen_ms_per_token (first generated token)
+    If gen_ms_per_token is missing, fall back to prompt_eval_ms.
+    """
+    if "prompt_eval_ms" not in timings:
+        return None
+    prompt_ms = float(timings["prompt_eval_ms"])
+    if "gen_ms_per_token" in timings:
+        return prompt_ms + float(timings["gen_ms_per_token"])
+    return prompt_ms
+
+def main():
+    ap = argparse.ArgumentParser(description="Run llama.cpp llama-cli and write benchmark JSON.")
+    ap.add_argument(
+        "--llama_cli",
+        default=str(Path.home() / "work" / "llama.cpp" / "build" / "bin" / "llama-cli"),
+        help="Path to llama-cli binary.",
+    )
+    ap.add_argument("--model", required=True, help="Path to .gguf model file.")
+    ap.add_argument("--prompt", default="Hello", help="Prompt text.")
+    ap.add_argument("--prompt_file", help="Path to prompt file (overrides --prompt).")
+    ap.add_argument("--n", type=int, default=128, help="Number of tokens to generate.")
+    ap.add_argument("--threads", "-t", type=int, default=8, help="Number of CPU threads.")
+    ap.add_argument("--seed", type=int, default=1234, help="Random seed.")
+    ap.add_argument("--temp", type=float, default=0.7, help="Temperature.")
+    ap.add_argument("--top_p", type=float, default=0.9, help="top-p.")
+    ap.add_argument("--repeat", type=int, default=1, help="Repeat runs (useful for warm runs).")
+    ap.add_argument(
+        "--mode",
+        choices=["warm", "cold", "direct"],
+        default="warm",
+        help="Label only (control cold/direct externally for now).",
+    )
+    ap.add_argument("--out", required=True, help="Output JSON path.")
+    ap.add_argument("--tag", default="", help="Optional tag (e.g., bw_cap_10GBps).")
+    args = ap.parse_args()
+
+    llama_cli = Path(args.llama_cli)
+    model = Path(args.model)
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not llama_cli.exists():
+        raise SystemExit(f"llama-cli not found at: {llama_cli}")
+    if not model.exists():
+        raise SystemExit(f"model not found at: {model}")
+
+    prompt_text = args.prompt
+    if args.prompt_file:
+        prompt_text = Path(args.prompt_file).read_text(encoding="utf-8")
+
+    base_cmd = [
+        str(llama_cli),
+        "-m",
+        str(model),
+        "-p",
+        prompt_text,
+        "-n",
+        str(args.n),
+        "-t",
+        str(args.threads),
+        "--seed",
+        str(args.seed),
+        "--temp",
+        str(args.temp),
+        "--top-p",
+        str(args.top_p),
+    ]
+
+    runs = []
+    for i in range(args.repeat):
+        print(f"\n=== RUN {i+1}/{args.repeat} ({args.mode}) ===")
+        start = time.time()
+        rc, output = run_cmd(base_cmd)
+        wall_ms = (time.time() - start) * 1000.0
+
+        timings = parse_timings(output)
+        ttft_est = estimate_ttft_ms(timings)
+
+        run_rec: Dict[str, Any] = {
+            "timestamp_unix": int(time.time()),
+            "mode": args.mode,
+            "tag": args.tag,
+            "cmd": " ".join(shlex.quote(x) for x in base_cmd),
+            "return_code": rc,
+            "wall_time_ms": wall_ms,
+            "model_path": str(model),
+            "llama_cli_path": str(llama_cli),
+            "prompt_preview": prompt_text[:200],
+            "metrics": {
+                **timings,
+                "ttft_est_ms": ttft_est,
+                "tok_per_s": timings.get("gen_tok_per_s"),
+            },
+        }
+        runs.append(run_rec)
+
+        if rc != 0:
+            print(f"Run failed with rc={rc}. Still writing output JSON for debugging.")
+            break
+
+    payload = {"schema": "hbf-ready-bench.v1", "runs": runs}
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(f"\nWrote: {out_path}")
+
+if __name__ == "__main__":
+    main()

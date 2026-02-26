@@ -1,0 +1,23 @@
+{
+  "platform": {
+    "system": "Linux",
+    "release": "6.6.87.2-microsoft-standard-WSL2",
+    "version": "#1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025",
+    "machine": "x86_64",
+    "processor": "x86_64"
+  },
+  "uname": "Linux krishna 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux",
+  "cpu": {
+    "lscpu": "Architecture:                         x86_64\nCPU op-mode(s):                       32-bit, 64-bit\nAddress sizes:                        48 bits physical, 48 bits virtual\nByte Order:                           Little Endian\nCPU(s):                               8\nOn-line CPU(s) list:                  0-7\nVendor ID:                            AuthenticAMD\nModel name:                           AMD Ryzen 3 5300U with Radeon Graphics\nCPU family:                           23\nModel:                                104\nThread(s) per core:                   2\nCore(s) per socket:                   4\nSocket(s):                            1\nStepping:                             1\nBogoMIPS:                             5190.08\nFlags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip rdpid\nVirtualization:                       AMD-V\nHypervisor vendor:                    Microsoft\nVirtualization type:                  full\nL1d cache:                            128 KiB (4 instances)\nL1i cache:                            128 KiB (4 instances)\nL2 cache:                             2 MiB (4 instances)\nL3 cache:                             4 MiB (1 instance)\nNUMA node(s):                         1\nNUMA node0 CPU(s):                    0-7\nVulnerability Gather data sampling:   Not affected\nVulnerability Itlb multihit:          Not affected\nVulnerability L1tf:                   Not affected\nVulnerability Mds:                    Not affected\nVulnerability Meltdown:               Not affected\nVulnerability Mmio stale data:        Not affected\nVulnerability Reg file data sampling: Not affected\nVulnerability Retbleed:               Mitigation; untrained return thunk; SMT enabled with STIBP protection\nVulnerability Spec rstack overflow:   Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                  Not affected\nVulnerability Tsx async abort:        Not affected"
+  },
+  "memory": {
+    "free_h": "total        used        free      shared  buff/cache   available\nMem:           7.4Gi       553Mi       4.1Gi       3.5Mi       3.0Gi       6.9Gi\nSwap:          2.0Gi          0B       2.0Gi"
+  },
+  "disk": {
+    "df_h": "Filesystem      Size  Used Avail Use% Mounted on\nnone            3.8G     0  3.8G   0% /usr/lib/modules/6.6.87.2-microsoft-standard-WSL2\nnone            3.8G  4.0K  3.8G   1% /mnt/wsl\ndrivers         476G  170G  307G  36% /usr/lib/wsl/drivers\n/dev/sdd       1007G  4.6G  952G   1% /\nnone            3.8G   76K  3.8G   1% /mnt/wslg\nnone            3.8G     0  3.8G   0% /usr/lib/wsl/lib\nrootfs          3.8G  2.7M  3.8G   1% /init\nnone            3.8G  508K  3.8G   1% /run\nnone            3.8G     0  3.8G   0% /run/lock\nnone            3.8G     0  3.8G   0% /run/shm\nnone            3.8G   96K  3.8G   1% /mnt/wslg/versions.txt\nnone            3.8G   96K  3.8G   1% /mnt/wslg/doc\nC:\\             476G  170G  307G  36% /mnt/c\ntmpfs           761M   20K  761M   1% /run/user/1000"
+  },
+  "wsl": {
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "is_wsl": true
+  }
+}

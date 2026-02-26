@@ -1,0 +1,10 @@
+timestamp_unix,mode,tag,model_path,threads,p,n,repeat,pp_tps,pp_mean,pp_std,tg_tps,tg_mean,tg_std,json_path
+1772107279,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,64,64,1,20.21 ± 2.32,20.21,2.32,4.95 ± 3.14,4.95,3.14,results/sweep/bench_p64_n64_r1.json
+1772107388,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,64,128,1,22.81 ± 4.87,22.81,4.87,8.37 ± 2.68,8.37,2.68,results/sweep/bench_p64_n128_r1.json
+1772107571,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,64,256,1,27.35 ± 1.41,27.35,1.41,8.15 ± 1.67,8.15,1.67,results/sweep/bench_p64_n256_r1.json
+1772107650,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,128,64,1,25.31 ± 3.47,25.31,3.47,7.39 ± 0.83,7.39,0.83,results/sweep/bench_p128_n64_r1.json
+1772107787,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,128,128,1,23.88 ± 3.06,23.88,3.06,6.71 ± 1.44,6.71,1.44,results/sweep/bench_p128_n128_r1.json
+1772107989,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,128,256,1,23.14 ± 2.69,23.14,2.69,7.81 ± 0.38,7.81,0.38,results/sweep/bench_p128_n256_r1.json
+1772108094,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,64,1,25.54 ± 2.63,25.54,2.63,8.60 ± 0.76,8.6,0.76,results/sweep/bench_p256_n64_r1.json
+1772108221,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,128,1,25.89 ± 1.29,25.89,1.29,10.42 ± 0.27,10.42,0.27,results/sweep/bench_p256_n128_r1.json
+1772108456,warm,,/home/manishkl/models/qwen2.5-3b-instruct-q4_k_m.gguf,8,256,256,1,28.59 ± 0.70,28.59,0.7,7.47 ± 1.54,7.47,1.54,results/sweep/bench_p256_n256_r1.json
